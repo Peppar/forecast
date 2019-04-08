@@ -1,0 +1,30 @@
+menu "Forecast app"
+
+config WIFI_SSID
+    string "WiFi SSID"
+    default ""
+    help
+        SSID (network name) for the device to connect to.
+
+config WIFI_PASSWORD
+    string "WiFi Password"
+    default ""
+    help
+        Password for your network.
+
+config APIXU_PORT
+    string "The TCP port number of the request"
+    default "443"
+    help
+        The TCP port number of the request, with http defaulting to 80
+        and https defaulting to 443
+
+config APIXU_URL
+    string "The full URL of the APIXU forecast"
+    default "https://api.apixu.com/v1/forecast.json?key=<YOUR_API_KEY>?&q=Bordeaux&days=2"
+    help
+        The URL to the appropriate forecast page on APIXU.
+        This normally looks something like this (replace <YOUR_API_KEY>):
+        https://api.apixu.com/v1/forecast.json?key=<YOUR_API_KEY>&q=Bordeaux&days=2
+
+endmenu
