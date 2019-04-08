@@ -3,16 +3,20 @@
 Connects to a weather service (APIXU, free for up to 10000 requests per month),
 and displays the forecast on the e-ink display.
 
-* Follow [the getting started guide for ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/get-started-devkitc.html).
-* Hook up the e-ink display to the GPIO pins of the ESP32.
-* Set the corresponding GPIO pin numbers in main/main.c
-* Run "make menuconfig" and fill in the required configuration variables.
-  Fill in everything in the "Forecast app" submenu.
-* Run "make flash monitor" with the device connected to make and
-  program the device and monitor for log messages. Don't forget to push
-  the BOOT button on the board when it says "Connecting".
+1. Follow [the getting started guide for ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/get-started-devkitc.html).
+2. Hook up the e-ink display to the GPIO pins of the ESP32.
+3. Set the corresponding GPIO pin numbers in main/main.c
+4. Run "make menuconfig" and fill in the required configuration variables.
+   Fill in everything in the "Forecast app" submenu.
+5. Run "make flash monitor" with the device connected to make and
+   program the device and monitor for log messages. Don't forget to push
+   the BOOT button on the board when it says "Connecting".
 
-# Legal remarks
+You can also use cmake to build out-of-tree. Initialize a cmake build
+directory between steps 3 and 4 and continue from this
+directory. Note: "make monitor" doesn't seem to work with cmake.
+
+## Legal remarks
 
 Based on the SPI master example in the ESP IDF, which is in the public domain,
 and on the HelTec Arduino library (https://github.com/HelTecAutomation/e-ink),
