@@ -39,7 +39,6 @@ void draw_temperature(uint8_t* buf, int x, int y, int temp, int radj) {
 
 esp_err_t draw_forecast(forecast_t* forecast) {
   uint8_t* buf = NULL;
-  const uint8_t* image;
 
   buf = malloc(EPD_WIDTH*EPD_HEIGHT/8);
   if (buf == NULL)

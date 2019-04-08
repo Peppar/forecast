@@ -18,6 +18,11 @@ extern const uint8_t lut_full_update[];
 extern const uint8_t lut_partial_update[];
 
 /**
+ *  @brief: wait for the device to deassert BUSY.
+ */
+void epd_wait_busy();
+
+/**
  *  @brief: set the look-up table register
  */
 void epd_set_lut(const uint8_t* lut);
@@ -68,6 +73,7 @@ esp_err_t epd_spi_bus_add(spi_host_device_t host,
 /**
  *  @brief: Initialize the display.
  */
-void epd_init(spi_device_handle_t spi, const uint8_t* lut, uint8_t dc_pin);
+void epd_init(spi_device_handle_t spi, const uint8_t* lut,
+              int dc_pin, int busy_pin);
 
 #endif

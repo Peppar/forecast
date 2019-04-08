@@ -148,10 +148,10 @@ static void forecast_task(void *parm) {
   forecast_t prev_forecast;
   int first_forecast = 1;
 
-  /* Initialize the display */
-  epd_init(g_epd, lut_full_update, PIN_NUM_DC);
-
   while (1) {
+    /* Initialize the display */
+    epd_init(g_epd, lut_full_update, PIN_NUM_DC, PIN_NUM_BUSY);
+
     /* Wait for the callback to set the CONNECTED_BIT in the
      * event group.
      */
@@ -186,6 +186,11 @@ static void forecast_task(void *parm) {
       vTaskDelay(10000 / portTICK_RATE_MS);
     }
 
+    /* Wait for the display to finish updating, then put it to sleep */
+    epd_wait_busy();
+    epd_sleep();
+
+    /* Put the module in deep sleep */
     ESP_LOGI(TAG, "Going to deep sleep");
     esp_sleep_enable_timer_wakeup(SLEEP_INTERVAL);
     esp_deep_sleep_start();

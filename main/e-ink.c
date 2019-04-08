@@ -37,10 +37,11 @@
 #define SET_RAM_Y_ADDRESS_COUNTER                   0x4F
 #define TERMINATE_FRAME_READ_WRITE                  0xFF
 
-/* We need to remember the D/C pin GPIO number.
- * Store it as a global variable.
+/* We need to remember the D/C pin and BUSY pin GPIO number.
+ * Store them as a global variables.
  */
 static int g_epd_dc_pin;
+static int g_epd_busy_pin;
 
 /* We keep a handle to the SPI device here.
  */
@@ -88,6 +89,13 @@ DRAM_ATTR static const epd_init_cmd_t epd_init_cmds[] =
    {0, {0}, 0xff},
   };
 
+/* Wait for the device to deassert BUSY.
+ */
+void epd_wait_busy()
+{
+  while(gpio_get_level(g_epd_busy_pin)) {/* No-op */}
+}
+
 /* Send a command to the display. Uses spi_device_polling_transmit,
  * which waits until the transfer is complete.
  *
@@ -104,8 +112,9 @@ static void epd_send_command(const uint8_t cmd)
     t.length = 8;                     // Command is 8 bits
     t.tx_buffer = &cmd;               // The data is the cmd itself
     t.user = (void*)0;                // D/C needs to be set to 0
-    ret=spi_device_polling_transmit(g_spi, &t); // Transmit!
-    assert(ret==ESP_OK);              // Should have had no issues.
+    epd_wait_busy();
+    ret = spi_device_polling_transmit(g_spi, &t); // Transmit!
+    assert(ret == ESP_OK);            // Should have had no issues.
 }
 
 /* Send data to the display. Uses spi_device_polling_transmit, which waits
@@ -297,15 +306,18 @@ esp_err_t epd_spi_bus_add(spi_host_device_t host,
 /**
  *  @brief: Initialize the display.
  */
-void epd_init(spi_device_handle_t spi, const uint8_t* lut, uint8_t dc_pin)
+void epd_init(spi_device_handle_t spi, const uint8_t* lut,
+              int dc_pin, int busy_pin)
 {
   int cmd = 0;
 
   g_spi = spi;
   g_epd_dc_pin = dc_pin;
+  g_epd_busy_pin = busy_pin;
 
   // Initialize non-SPI GPIOs
   gpio_set_direction(dc_pin, GPIO_MODE_OUTPUT);
+  gpio_set_direction(busy_pin, GPIO_MODE_INPUT);
 
   printf("E-ink initialization.\n");
 
