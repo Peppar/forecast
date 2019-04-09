@@ -1,6 +1,6 @@
 # Forecast for ESP32-WROOM-32 and HelTec e-ink1.54
 
-Connects to a weather service (APIXU, free for up to 10000 requests per month),
+Connects to a weather service ([APIXU](https://www.apixu.com/), free for up to 10000 requests per month),
 and displays the forecast on the e-ink display.
 
 ![The ESP32-WROOM-32 module connected to the HelTec e-ink1.54 module on a breadboard](https://user-images.githubusercontent.com/51078/55734599-1f2ce500-5a20-11e9-8456-ad8c125d6106.jpg "Forecast test setup")
