@@ -47,11 +47,11 @@ static int glyph_width(int glyph) {
   case 10: return 26;
   case 11: return 32;
   case 12: return 22;
-  default: return 32;
+  default: return 0;
   }
 }
 
-static const uint8_t* glyph_origin(int glyph, int index) {
+static const uint8_t* glyph_start(int glyph, int index) {
   if (glyph < 0 || glyph >= GLYPH_COUNT || index < 0 || index >= INDEX_COUNT)
     return NULL;
   return glyphs_raw_start+(glyph*GLYPH_WIDTH*2/8
@@ -65,7 +65,7 @@ static void draw_glyph(uint8_t* buf, int width, int height,
   int wbytes;
   int xbytes, xshift, gx, gy;
 
-  g = glyph_origin(glyph, index);
+  g = glyph_start(glyph, index);
   if (g == NULL)
     return;
 
@@ -73,8 +73,8 @@ static void draw_glyph(uint8_t* buf, int width, int height,
     ++g;
 
   wbytes = width / 8;
-  xbytes = x / 8;
-  xshift = ((unsigned int)x) % 8; /* C modulo operator isn't the real deal */
+  xbytes = x >> 3; /* Let's hope the compiler infers an arithmetic shift */
+  xshift = x & 7;
 
   for (gy = 0; gy < 64; ++gy) {
     uint8_t rem = (set ? 0xFF : 0x00) << (8 - xshift);
@@ -83,8 +83,7 @@ static void draw_glyph(uint8_t* buf, int width, int height,
     for (gx = 0; gx < 9; ++gx) {
       uint8_t gdat;
       uint8_t data;
-      gdat = gx != 8 ? g[2*gx+GLYPHS_ROW_SIZE*gy] :
-        set ? 0xFF : 0x00;
+      gdat = gx != 8 ? g[2*gx+GLYPHS_ROW_SIZE*gy] : set ? 0xFF : 0x00;
       data = rem | (gdat >> xshift);
       rem = gdat << (8 - xshift);
       if (xbytes+gx < 0 || xbytes+gx >= wbytes)
@@ -97,12 +96,13 @@ static void draw_glyph(uint8_t* buf, int width, int height,
   }
 }
 
-static int glyph_indexes[GLYPH_COUNT] = {0};
+/* The next index for each glyph to be drawn. We cycle through the indexes
+ * so that glyphs start repeating after eight renderings.
+ */
+static int g_glyph_indexes[GLYPH_COUNT] = {0};
 
 void draw_text(uint8_t* buf, int width, int height,
                int x, int y, const char* s, int radj) {
-  int xx;
-  const char *ss;
   int indexes[13];
 
   /* The glyphs' origins are 16 from the left and 16 from the bottom */
@@ -114,20 +114,23 @@ void draw_text(uint8_t* buf, int width, int height,
 
   /* First clear all of the glyphs then set all of the glyphs */
   for (int set = 0; set != 2; ++set) {
-    for (int i = 0; i < 13; ++i) {
-      indexes[i] = glyph_indexes[i];
+    for (int i = 0; i < GLYPH_COUNT; ++i) {
+      indexes[i] = g_glyph_indexes[i];
     }
-    for (xx = x, ss = s; *ss; ++ss) {
+    int xx = x;
+    for (const char *ss = s; *ss; ++ss) {
       int glyph = char_to_glyph(*ss);
-      draw_glyph(buf, width, height, xx, y, glyph, indexes[glyph], set);
-      xx += glyph_width(glyph);
-      indexes[glyph] = (indexes[glyph] + 1) % INDEX_COUNT;
+      if (glyph >= 0) {
+        draw_glyph(buf, width, height, xx, y, glyph, indexes[glyph], set);
+        xx += glyph_width(glyph);
+        indexes[glyph] = (indexes[glyph] + 1) % INDEX_COUNT;
+      }
     }
   }
 
   /* Update the glyph indexes */
   for (int i = 0; i < GLYPH_COUNT; ++i) {
-    glyph_indexes[i] = indexes[i];
+    g_glyph_indexes[i] = indexes[i];
   }
 }
 
