@@ -105,11 +105,12 @@ void draw_text(uint8_t* buf, int width, int height,
   const char *ss;
   int indexes[13];
 
-  if (radj) {
-    for (ss = s; *ss; ++ss) {
-      x -= glyph_width(char_to_glyph(*ss));
-    }
-  }
+  /* The glyphs' origins are 16 from the left and 16 from the bottom */
+  x -= 16;
+  y -= 48;
+
+  if (radj)
+    x -= text_width(s);
 
   /* First clear all of the glyphs then set all of the glyphs */
   for (int set = 0; set != 2; ++set) {
@@ -128,4 +129,11 @@ void draw_text(uint8_t* buf, int width, int height,
   for (int i = 0; i < GLYPH_COUNT; ++i) {
     glyph_indexes[i] = indexes[i];
   }
+}
+
+int text_width(const char* s) {
+  int width = 0;
+  while (*s)
+    width += glyph_width(char_to_glyph(*s++));
+  return width;
 }

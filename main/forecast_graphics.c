@@ -52,8 +52,8 @@ esp_err_t draw_forecast(forecast_t* forecast) {
   memcpy(buf, icon, EPD_WIDTH*EPD_HEIGHT/8);
 
   /* Draw the minimum and maximum temperatures */
-  draw_temperature(buf, -15, 150, forecast->temp_min, 0);
-  draw_temperature(buf, 185, 150, forecast->temp_max, 1);
+  draw_temperature(buf, 0, 198, forecast->temp_min, 0);
+  draw_temperature(buf, 200, 198, forecast->temp_max, 1);
 
   epd_set_frame_memory(buf);
   epd_display_frame();
